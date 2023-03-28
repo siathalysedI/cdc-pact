@@ -1,0 +1,87 @@
+FROM jenkins/jenkins:jdk11
+
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
+
+RUN jenkins-plugin-cli --plugins \
+  ace-editor \
+  ant \
+  antisamy-markup-formatter \
+  authentication-tokens \
+  bouncycastle-api \
+  branch-api \
+  build-timeout \
+  cloudbees-folder \
+  credentials \
+  credentials-binding \
+  display-url-api \
+  docker-commons \
+  docker-workflow \
+  durable-task \
+  email-ext \
+  external-monitor-job \
+  favorite \
+  git \
+  git-client \
+  github \
+  github-api \
+  github-branch-source \
+  gitlab-plugin \
+  git-server \
+  global-build-stats \
+  gradle \
+  handlebars \
+  icon-shim \
+  jackson2-api \
+  jquery-detached \
+  junit \
+  ldap \
+  mailer \
+  mapdb-api \
+  matrix-auth \
+  matrix-project \
+  metrics \
+  momentjs \
+  pam-auth \
+  pipeline-build-step \
+  pipeline-github-lib \
+  pipeline-graph-analysis \
+  pipeline-input-step \
+  pipeline-milestone-step \
+  pipeline-model-api \
+  pipeline-model-declarative-agent \
+  pipeline-model-definition \
+  pipeline-model-extensions \
+  pipeline-rest-api \
+  pipeline-stage-step \
+  pipeline-stage-tags-metadata \
+  pipeline-stage-view \
+  plain-credentials \
+  pubsub-light \
+  purge-job-history \
+  resource-disposer \
+  role-strategy \
+  scm-api \
+  script-security \
+  sse-gateway \
+  ssh-credentials \
+  ssh-slaves \
+  structs \
+  subversion \
+  timestamper \
+  token-macro \
+  variant \
+  windows-slaves \
+  workflow-aggregator \
+  workflow-api \
+  workflow-basic-steps \
+  workflow-cps \
+  workflow-cps-global-lib \
+  workflow-durable-task-step \
+  workflow-job \
+  workflow-multibranch \
+  workflow-scm-step \
+  workflow-step-api \
+  workflow-support \
+  ws-cleanup
+
+USER jenkins

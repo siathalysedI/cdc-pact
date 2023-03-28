@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'maven' 
+    }
+
+    environment {
+      BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
+    }
+
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scmGit(
+                    branches: [[name: '*/'+ BRANCH_NAME]], 
+                    userRemoteConfigs: [[url: 'https://github.com/RajatADP/contract-test-pact.git']])
+            }
+        }
+        stage('Run Contract Tests') {
+            steps {
+                dir('creditCard') {
+                    sh 'mvn clean install -Dtest=PactConsumerTest'
+                }
+            }
+        }
+        stage('Publish Pact to Broker') {
+            steps {
+                dir('creditCard') {
+                    sh 'mvn pact:publish -Dpact.consumer.branch=${BRANCH_NAME} -Dpact.pacticipant.version=${GIT_COMMIT}'
+                }
+            }
+        }
+        stage('Can-i-deploy?') {
+            steps {
+                sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.91.0/pact-1.91.0-linux-x86_64.tar.gz'
+                sh 'tar xzf pact-1.91.0-linux-x86_64.tar.gz'
+                    dir('pact/bin') {
+                        // sh './pact-broker create-webhook http://jenkins:8080/job/provider-ci/ --request POST -b http://pact-broker:9292 --contract_requiring_verification_published'
+                        sh './pact-broker can-i-deploy --retry-while-unknown=12 --retry-interval=10 -a creditCard -b http://pact-broker:9292 -e ${GIT_COMMIT}'
+                    }
+            }
+        }
+        stage('Tag pacticipant version to master') {
+            input {
+                message 'Consumer branch ${BRANCH_NAME} merged to master?'
+            }
+            steps {
+                dir('pact/bin') {
+                    sh './pact-broker create-version-tag -a creditCard -e ${GIT_COMMIT} -b http://pact-broker:9292 -t master'
+                    echo 'Safe to deploy to dev environment!'
+                }
+            }
+        }
+    }
+}
