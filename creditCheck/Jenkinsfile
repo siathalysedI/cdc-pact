@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven' 
+    }
+
+    environment {
+      BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
+   }
+    
+    stages {
+        stage('checkout') {
+            steps {
+
+                checkout scmGit(
+                    branches: [[name: '*/'+ BRANCH_NAME]],
+                    userRemoteConfigs: [[url: 'https://github.com/RajatADP/contract-test-pact.git']])
+            }
+        }
+        stage('Run Contract Tests') {
+            steps {
+                dir('creditCheck') {
+                    sh 'mvn clean install -Dtest=PactProviderTest'
+                }
+            }
+        }
+        
+        stage('Can-i-deploy?') {
+            steps {
+                sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.91.0/pact-1.91.0-linux-x86_64.tar.gz'
+                sh 'tar xzf pact-1.91.0-linux-x86_64.tar.gz'
+                    dir('pact/bin') {
+                        sh './pact-broker can-i-deploy -a creditCheck -b http://pact-broker:9292 -e ${GIT_COMMIT}'
+                    }
+            }
+        }
+        stage('Tag pacticipant version to master') {
+            input {
+                message 'Provider branch ${BRANCH_NAME} merged to master?'
+            }
+            steps {
+                dir('pact/bin') {
+                    sh './pact-broker create-version-tag -a creditCheck -e ${GIT_COMMIT} -b http://pact-broker:9292 -t master'
+                }
+            }
+        }
+    }
+}

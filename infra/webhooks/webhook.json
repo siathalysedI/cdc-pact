@@ -1,0 +1,23 @@
+{
+  "description": "Trigger provider ci build on Jenkins",
+  "provider": {
+    "name": "creditCheck"
+  },
+  "consumer": {
+    "name": "creditCard"
+  },
+  "events": [
+    {
+      "name": "contract_requiring_verification_published"
+    }
+  ],
+  "request": {
+    "method": "POST",
+    "url": "http://localhost:8080/job/provider-ci/build",
+    "username": "admin",
+    "password": "admin",
+    "headers": {
+      "Accept": "application/json"
+    }
+  }
+}

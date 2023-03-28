@@ -1,0 +1,68 @@
+properties([
+    parameters ([
+        string(name: 'Application', defaultValue: 'creditCard', description: 'Enter consumer to check deployment feasibility'),
+        choice(name: 'Environment', choices: ['pre-prod', 'test', 'production'], description: 'Pick environment where consumer has to be deployed'),
+        string(name: 'ProviderTag', defaultValue: 'provider_tag', description: 'Contract verified against GIT_COMMIT of provider changes'),
+        string(name: 'ConsumerVersion', defaultValue: 'consumer_version', description: 'Contract verified for consumer version')
+])  ])
+pipeline {
+    agent any
+
+    environment {
+      BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
+    }
+
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scmGit(
+                    branches: [[name: '*/'+ BRANCH_NAME]],
+                    userRemoteConfigs: [[url: 'https://github.com/RajatADP/contract-test-pact.git']]
+                )
+            }
+        }
+
+        stage('Creating Environment') {
+            when {
+                // Only run when branch is main/master
+                expression { "${BRANCH_NAME}" == "main" || "master" }
+            }
+            steps {
+                sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.91.0/pact-1.91.0-linux-x86_64.tar.gz'
+                sh 'tar xzf pact-1.91.0-linux-x86_64.tar.gz'
+                dir('pact/bin') {
+                    catchError(buildResult: 'SUCCESS', message: '${params.Environment} already exist', stageResult: 'FAILURE') {
+                        //script {
+                            //if (${params.Environment} != 'production') {
+                                echo "Creating ${params.Environment} environment "
+                                sh "./pact-broker create-environment --name ${params.Environment} --display-name ${params.Environment} -b http://pact-broker:9292 --no-production"
+                            //}  else {
+                                //echo 'Creating ${params.Environment} environment '
+                                // sh './pact-broker create-environment --name ${params.Environment} --display-name ${params.Environment} -b http://pact-broker:9292 --production'
+                            //}
+                        //}
+                    }
+                }
+            }
+        }
+        stage('To Environment: Can-i-deploy?') {
+            input {
+                message "Ready to deploy to environment?"
+            }
+            steps {
+                echo "Deploying to ${params.Environment} environment"
+                dir('pact/bin') {
+                    sh "./pact-broker can-i-deploy -a ${params.Application} -b http://pact-broker:9292 -e ${params.ConsumerVersion} -t ${params.ProviderTag}"
+                }
+            }
+        }
+        stage('Record Deployment') {
+            steps {
+                dir('pact/bin') {
+                    sh "./pact-broker record-deployment --environment ${params.Environment} -a ${params.Application} -b http://pact-broker:9292 -e ${params.ConsumerVersion}"
+                }
+            }
+        }
+    }
+
+}
