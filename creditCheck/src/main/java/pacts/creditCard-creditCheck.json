@@ -1,0 +1,51 @@
+{
+  "consumer": {
+    "name": "creditCard"
+  },
+  "interactions": [
+    {
+      "description": "POST req to credit check provider",
+      "providerState": "citizen exist",
+      "request": {
+        "body": {
+          "citizenNumber": 1
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.citizenNumber": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/credit-scores"
+      },
+      "response": {
+        "body": {
+          "score": "HIGH"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.score": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.4.5"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "creditCheck"
+  }
+}
