@@ -52,7 +52,7 @@ pipeline {
             steps {
                 echo "Deploying to ${params.Environment} environment"
                 dir('pact/bin') {
-                    sh "./pact-broker can-i-deploy -a ${params.Application} -b http://pact-broker:9292 -e ${params.ConsumerVersion} -t ${params.ProviderTag}"
+                    sh "./pact-broker can-i-deploy -a ${params.Application} -b http://pact-broker:9292 -e ${params.ConsumerVersion} --to ${params.ProviderTag}"
                 }
             }
         }
