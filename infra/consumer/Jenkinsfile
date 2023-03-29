@@ -17,7 +17,7 @@ pipeline {
             steps {
                 checkout scmGit(
                     branches: [[name: '*/'+ BRANCH_NAME]],
-                    userRemoteConfigs: [[url: 'https://github.com/RajatADP/contract-test-pact.git']]
+                    userRemoteConfigs: [[url: 'https://github.com/RajatADP/cdc-pact.git']]
                 )
             }
         }
