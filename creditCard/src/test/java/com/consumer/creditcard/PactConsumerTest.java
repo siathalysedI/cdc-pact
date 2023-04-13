@@ -63,7 +63,6 @@ public class PactConsumerTest {
                 .toPact();
     }
 
-
     @Test
     @PactTestFor(pactMethod = "pact_getCreditCheckResponse")
     @MockServerConfig(hostInterface = "localhost", port = "1234")
