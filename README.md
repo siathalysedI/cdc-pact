@@ -92,10 +92,5 @@ Contributions to this sample project are welcome! If you would like to contribut
 Please ensure that your code adheres to the project's coding standards and includes appropriate tests.
 
 
-## Authors
-
-- Rajat \<rjtmishra009@gmail.com\>
-
-Feel free to contact the authors if you have any questions or feedback.
 
 That's it! You can update the template with the relevant information for your Pact JVM sample project using Maven. Happy testing!
